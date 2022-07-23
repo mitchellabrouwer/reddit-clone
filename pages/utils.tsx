@@ -1,3 +1,27 @@
+function Button({ task }) {
+  return (
+    <div className="mb-5 flex-1">
+      <button
+        className="color-accent-contrast bg-color-accent hover:bg-color-accent-hover-darker mt-5 mr-8 rounded-full border px-8 py-2 font-bold"
+        type="button"
+        onClick={async () => {
+          await fetch("/api/utils", {
+            body: JSON.stringify({
+              task: task.task,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+            method: "POST",
+          });
+        }}
+      >
+        {task.description}
+      </button>
+    </div>
+  );
+}
+
 export default function Utils() {
   const tasks = [
     {
@@ -17,27 +41,6 @@ export default function Utils() {
       description: "Clean the database",
     },
   ];
-
-  const Button = ({ task }) => (
-    <div className="flex-1 mb-5">
-      <button
-        className="border px-8 py-2 mt-5 mr-8 font-bold rounded-full color-accent-contrast bg-color-accent hover:bg-color-accent-hover-darker"
-        onClick={async () => {
-          await fetch("/api/utils", {
-            body: JSON.stringify({
-              task: task.task,
-            }),
-            headers: {
-              "Content-Type": "application/json",
-            },
-            method: "POST",
-          });
-        }}
-      >
-        {task.description}
-      </button>
-    </div>
-  );
 
   return (
     <div className="mt-10 ml-20">
