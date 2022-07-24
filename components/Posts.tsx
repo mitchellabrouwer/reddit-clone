@@ -6,6 +6,7 @@ export default function Posts({ posts }) {
   return (
     <>
       {posts.map((post, index) => (
+        // eslint-disable-next-line react/no-array-index-key
         <Post key={index} post={post} />
       ))}
     </>

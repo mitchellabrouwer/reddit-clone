@@ -47,6 +47,7 @@ export default function Utils() {
       <h2 className="mb-10 text-xl">Utils</h2>
 
       {tasks.map((task, index) => (
+        // eslint-disable-next-line react/no-array-index-key
         <Button key={index} task={task} />
       ))}
     </div>
