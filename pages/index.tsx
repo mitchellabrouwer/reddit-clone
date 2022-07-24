@@ -30,9 +30,9 @@ export default function Home({ posts }) {
       <header className="flex h-12 bg-black px-5 pt-3 pb-2 text-white">
         <p>Reddit clone</p>
         <p className="grow" />
-        <Link href="/api/auth/signin">
+        <Link href={session ? "/api/auth/signout" : "/api/auth/signin"}>
           <a className="flex-l mb-1 rounded-full border px-4 font-bold">
-            login
+            {session ? "logout" : "login"}
           </a>
         </Link>
       </header>
