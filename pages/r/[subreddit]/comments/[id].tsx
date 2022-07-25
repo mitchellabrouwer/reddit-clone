@@ -10,16 +10,17 @@ export default function Post({ subreddit, post }) {
 
   return (
     <>
-      <Link href="/">
-        <a className="block p-5 text-center underline">
-          🔙 back to the homepage
-        </a>
-      </Link>
-      <Link href={`/r/${subreddit.name}`}>
-        <a className="block p-5 text-center underline">
-          🔙 back to /r/{subreddit.name}
-        </a>
-      </Link>
+      <header className="flex h-12 bg-black px-5 pt-3 pb-2 text-white">
+        <Link href="/">
+          <a className="underline">Home</a>
+        </Link>
+        <p className="grow" />
+      </header>
+      <header className="flex h-12 bg-black px-5 pt-3 pb-2 text-white">
+        <p className="text-center">/r/{subreddit.name}</p>
+        <p className="ml-4 grow text-left">{subreddit.description}</p>
+      </header>
+
       <div className="border-3 mx-20 my-10 mb-4 flex flex-col border border-black bg-gray-200 p-10">
         <div className="flex flex-shrink-0 pb-0 ">
           <div className="group block flex-shrink-0 ">
@@ -45,10 +46,8 @@ export default function Post({ subreddit, post }) {
 }
 
 export async function getServerSideProps({ params }) {
-  console.log(parseInt(params.id, 10));
-
   const subreddit = await getSubreddit(params.subreddit, prisma);
-  let post = await getPost(parseInt(params.id), prisma);
+  let post = await getPost(parseInt(params.id, 10), prisma);
   post = JSON.parse(JSON.stringify(post));
 
   return {
