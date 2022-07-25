@@ -11,15 +11,21 @@ function Post({ post }) {
               <a className="mr-2 underline">/r/{post.subredditName}</a>
             </Link>
             /r/{post.subredditName} Posted by {post.author.name}
-            {timeago.format(new Date(post.createdAt))}
+            <Link href={`/r/${post.subredditName}/comments/${post.id}`}>
+              <a className="mx-2 underline">
+                {timeago.format(new Date(post.createdAt))}
+              </a>
+            </Link>
           </div>
         </div>
       </div>
 
       <div className="mt-5">
-        <p className="color-primary width-auto flex-shrink text-2xl font-bold">
-          {post.title}
-        </p>{" "}
+        <Link href={`/r/${post.subredditName}/comments/${post.id}`}>
+          <a className="color-primary width-auto flex-shrink text-2xl font-bold">
+            {post.title}
+          </a>
+        </Link>
         <p className="color-primary width-auto flex-shrink text-2xl font-bold">
           {post.content}
         </p>
