@@ -1,14 +1,29 @@
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import Comments from "../../../../components/Comments";
 import NewComment from "../../../../components/NewComment";
-import { getPost, getSubreddit } from "../../../../lib/data";
+import { getPost, getSubreddit, getVote, getVotes } from "../../../../lib/data";
 import prisma from "../../../../lib/prisma";
 import timeago from "../../../../lib/timeago";
 
-export default function Post({ subreddit, post }) {
+export default function Post({ subreddit, post, votes, vote }) {
   const { data: session, status } = useSession();
   const loading = status === "loading";
+  const router = useRouter();
+
+  const sendVote = async (up) => {
+    await fetch("/api/vote", {
+      body: JSON.stringify({
+        post: post.id,
+        up,
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+
+    router.reload();
+  };
 
   if (loading) {
     return null;
@@ -31,51 +46,90 @@ export default function Post({ subreddit, post }) {
         <p className="ml-4 grow text-left">{subreddit.description}</p>
       </header>
 
-      <div className="border-3 mx-20 my-10 mb-4 flex flex-col border border-black bg-gray-200 p-10">
-        <div className="flex flex-shrink-0 pb-0 ">
-          <div className="group block flex-shrink-0 ">
-            <div className="flex items-center text-gray-800">
-              Posted by {post.author.name} **
-              <p className="mx-2 underline">
-                {timeago.format(new Date(post.createdAt))}
-              </p>
-            </div>
+      <div className="mb-4 flex flex-row  justify-center px-10">
+        <div className="border-3 my-10 mb-4 flex flex-col border-t border-l border-b border-black bg-gray-200 p-10 text-center">
+          <div
+            className="cursor-pointer"
+            onClick={async (e) => {
+              e.preventDefault();
+              sendVote(true);
+            }}
+          >
+            {vote?.up ? "⬆" : "↑"}
+          </div>
+          <div>{votes}</div>
+          <div
+            className="cursor-pointer"
+            onClick={async (e) => {
+              e.preventDefault();
+              sendVote(false);
+            }}
+          >
+            {/* eslint-disable-next-line no-nested-ternary */}
+            {!vote ? "↓" : vote?.up ? "↓" : "⬇"}
           </div>
         </div>
-        <div className="mt-1">
-          <a className="color-primary width-auto flex-shrink text-2xl font-bold">
-            {post.title}
-          </a>
-          <p className="color-primary width-auto mt-2 flex-shrink text-base font-normal">
-            {post.content}
-          </p>
+
+        <div className="border-3 my-10 mb-4 flex flex-col border-t border-r border-b border-black bg-gray-200 p-10 pl-0">
+          <div className="flex flex-shrink-0 pb-0 ">
+            <div className="group block flex-shrink-0 ">
+              <div className="flex items-center text-gray-800">
+                Posted by {post.author.name} **
+                <p className="mx-2 underline">
+                  {timeago.format(new Date(post.createdAt))}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-1">
+            <a className="color-primary width-auto flex-shrink text-2xl font-bold">
+              {post.title}
+            </a>
+            <p className="color-primary width-auto mt-2 flex-shrink text-base font-normal">
+              {post.content}
+            </p>
+          </div>
+
+          {session ? (
+            <NewComment post={post} />
+          ) : (
+            <p className="mt-5">
+              <Link href="/api/auth/signin">
+                <a className="mr-1 underline">Login to comment</a>
+              </Link>
+            </p>
+          )}
+
+          <Comments comments={post.comments} />
         </div>
-
-        {session ? (
-          <NewComment post={post} />
-        ) : (
-          <p className="mt-5">
-            <Link href="/api/auth/signin">
-              <a className="mr-1 underline">Login to comment</a>
-            </Link>
-          </p>
-        )}
-
-        <Comments comments={post.comments} />
       </div>
     </>
   );
 }
 
-export async function getServerSideProps({ params }) {
-  const subreddit = await getSubreddit(params.subreddit, prisma);
-  let post = await getPost(parseInt(params.id, 10), prisma);
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  const subreddit = await getSubreddit(context.params.subreddit, prisma);
+  let post = await getPost(parseInt(context.params.id, 10), prisma);
   post = JSON.parse(JSON.stringify(post));
+
+  let votes = await getVotes(parseInt(context.params.id, 10), prisma);
+  votes = JSON.parse(JSON.stringify(votes));
+
+  let vote = await getVote(
+    parseInt(context.params.id, 10),
+    session?.user.id,
+    prisma
+  );
+  vote = JSON.parse(JSON.stringify(vote));
 
   return {
     props: {
       subreddit,
       post,
+      votes,
+      vote,
     },
   };
 }
