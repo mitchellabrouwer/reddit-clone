@@ -1,9 +1,19 @@
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Comments from "../../../../components/Comments";
+import NewComment from "../../../../components/NewComment";
 import { getPost, getSubreddit } from "../../../../lib/data";
 import prisma from "../../../../lib/prisma";
 import timeago from "../../../../lib/timeago";
 
 export default function Post({ subreddit, post }) {
+  const { data: session, status } = useSession();
+  const loading = status === "loading";
+
+  if (loading) {
+    return null;
+  }
+
   if (!post) {
     return <p className="p-5 text-center">Post does not exist</p>;
   }
@@ -40,6 +50,18 @@ export default function Post({ subreddit, post }) {
             {post.content}
           </p>
         </div>
+
+        {session ? (
+          <NewComment post={post} />
+        ) : (
+          <p className="mt-5">
+            <Link href="/api/auth/signin">
+              <a className="mr-1 underline">Login to comment</a>
+            </Link>
+          </p>
+        )}
+
+        <Comments comments={post.comments} />
       </div>
     </>
   );

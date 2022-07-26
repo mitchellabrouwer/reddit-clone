@@ -41,7 +41,19 @@ export const getPostsFromSubreddit = async (subreddit, prisma) => {
 export const getPost = async (id, prisma) => {
   const post = await prisma.post.findUnique({
     where: { id },
-    include: { author: true },
+    include: {
+      author: true,
+      comments: {
+        orderBy: [
+          {
+            id: "desc",
+          },
+        ],
+        include: {
+          author: true,
+        },
+      },
+    },
   });
 
   return post;
