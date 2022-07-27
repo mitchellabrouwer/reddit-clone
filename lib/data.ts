@@ -1,3 +1,7 @@
+/* eslint-disable no-shadow */
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-use-before-define */
+/* eslint-disable camelcase */
 export const getPosts = async (prisma) => {
   const posts = await prisma.post.findMany({
     where: {},
@@ -38,12 +42,51 @@ export const getPostsFromSubreddit = async (subreddit, prisma) => {
   return posts;
 };
 
+const fetchCommentsOfComments = async (comments, prisma) => {
+  const fetchCommentsOfComment = async (comment, prisma) => {
+    comment.comments = await getComments(comment.id, prisma);
+    return comment;
+  };
+
+  return Promise.all(
+    comments.map((comment) => {
+      comment = fetchCommentsOfComment(comment, prisma);
+      return comment;
+    })
+  );
+};
+
+const getComments = async (parent_id, prisma) => {
+  let comments = await prisma.comment.findMany({
+    where: {
+      parentId: parent_id,
+    },
+    orderBy: [
+      {
+        id: "desc",
+      },
+    ],
+    include: {
+      author: true,
+    },
+  });
+
+  if (comments.length) {
+    comments = await fetchCommentsOfComments(comments, prisma);
+  }
+
+  return comments;
+};
+
 export const getPost = async (id, prisma) => {
   const post = await prisma.post.findUnique({
     where: { id },
     include: {
       author: true,
       comments: {
+        where: {
+          parentId: null,
+        },
         orderBy: [
           {
             id: "desc",
@@ -55,6 +98,10 @@ export const getPost = async (id, prisma) => {
       },
     },
   });
+
+  if (post.comments) {
+    post.comments = await fetchCommentsOfComments(post.comments, prisma);
+  }
 
   return post;
 };

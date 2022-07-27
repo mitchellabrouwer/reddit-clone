@@ -1,6 +1,21 @@
 import { getSession } from "next-auth/react";
 import prisma from "../../lib/prisma";
 
+interface Comment {
+  content: any;
+  post: {
+    connect: {
+      id: any;
+    };
+  };
+  author: {
+    connect: {
+      id: string;
+    };
+  };
+  parent?: any;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(501).end();
@@ -23,21 +38,25 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const comment = await prisma.comment.create({
-      data: {
-        content: req.body.content,
-        post: {
-          connect: {
-            id: req.body.post,
-          },
-        },
-        author: {
-          connect: {
-            id: user.id,
-          },
+    const data: Comment = {
+      content: req.body.content,
+      post: {
+        connect: {
+          id: req.body.post,
         },
       },
-    });
+      author: {
+        connect: {
+          id: user.id,
+        },
+      },
+    };
+
+    if (req.body.comment) {
+      data.parent = { connect: { id: req.body.comment } };
+    }
+
+    const comment = await prisma.comment.create({ data });
 
     return res.json(comment);
   }

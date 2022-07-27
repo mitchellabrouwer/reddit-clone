@@ -91,7 +91,7 @@ export default function Post({ subreddit, post, votes, vote }) {
           </div>
 
           {session ? (
-            <NewComment post={post} />
+            <NewComment post={post} comment={undefined} />
           ) : (
             <p className="mt-5">
               <Link href="/api/auth/signin">
@@ -100,7 +100,7 @@ export default function Post({ subreddit, post, votes, vote }) {
             </p>
           )}
 
-          <Comments comments={post.comments} />
+          <Comments comments={post.comments} post={post} />
         </div>
       </div>
     </>
