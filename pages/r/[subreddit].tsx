@@ -1,10 +1,19 @@
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import Posts from "../../components/Posts";
 import { getPostsFromSubreddit, getSubreddit } from "../../lib/data";
 import prisma from "../../lib/prisma";
 
 export default function Subreddit({ subreddit, posts }) {
   console.log(subreddit);
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const loading = status === "loading";
+
+  if (loading) {
+    return null;
+  }
 
   if (!subreddit) {
     return <p className="p-5 text-center">Subreddit does not exist</p>;
@@ -22,6 +31,18 @@ export default function Subreddit({ subreddit, posts }) {
         <p className="text-center">/r/{subreddit.name}</p>
         <p className="text-left-grow ml-4">{subreddit.description}</p>
       </header>
+
+      {session && (
+        <div className="border-3 my-10 mx-20 border border-black p-10">
+          <input
+            placeholder="Create post"
+            className="w-full border-2 border-gray-800 p-4"
+            onClick={() => {
+              router.push(`/r/${subreddit.name}/submit`);
+            }}
+          ></input>
+        </div>
+      )}
 
       <Posts posts={posts} />
     </>
