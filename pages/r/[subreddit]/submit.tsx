@@ -9,6 +9,9 @@ export default function NewPost({ subreddit }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [image, setImage] = useState(null);
+  const [imageURL, setImageURL] = useState(null);
+
   const { data: session, status } = useSession();
   const loading = status === "loading";
 
@@ -48,22 +51,23 @@ export default function NewPost({ subreddit }) {
                 alert("Enter a title");
                 return;
               }
-              if (!content) {
+              if (!content && !image) {
                 alert("Enter some text in the post");
                 return;
               }
+
+              const body = new FormData();
+              body.append("image", image);
+              body.append("title", title);
+              body.append("content", content);
+              body.append("subreddit_name", subreddit.name);
+
               const res = await fetch("/api/post", {
-                body: JSON.stringify({
-                  title,
-                  content,
-                  subreddit_name: subreddit.name,
-                }),
-                headers: {
-                  "Content-Type": "application/json",
-                },
+                body,
                 method: "POST",
               });
               console.log(res);
+
               router.push(`/r/${subreddit.name}`);
             }}
           >
@@ -80,6 +84,29 @@ export default function NewPost({ subreddit }) {
               placeholder="The post content"
               onChange={(e) => setContent(e.target.value)}
             />
+            <div className="text-sm text-gray-600">
+              <label className="relative my-3 block cursor-pointer font-medium underline">
+                {!imageURL && <p>Upload an image</p>}
+                <img src={imageURL}></img>
+                <input
+                  name="image"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => {
+                    if (event.target.files && event.target.files[0]) {
+                      if (event.target.files[0].size > 3072000) {
+                        alert("maximum size allowed is 3MB");
+                        return false;
+                      }
+                      setImage(event.target.files[0]);
+                      setImageURL(URL.createObjectURL(event.target.files[0]));
+                    }
+                  }}
+                ></input>
+              </label>
+            </div>
+
             <div className="mt-5">
               <button
                 type="submit"

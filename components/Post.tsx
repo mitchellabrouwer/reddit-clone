@@ -26,6 +26,12 @@ function Post({ post }) {
             {post.title}
           </a>
         </Link>
+        {post.image && (
+          <img
+            className="color-primary width-auto mt-2 flex-shrink text-base font-normal"
+            src={post.image}
+          />
+        )}
         <p className="color-primary width-auto flex-shrink text-2xl font-bold">
           {post.content}
         </p>
