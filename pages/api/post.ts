@@ -9,7 +9,7 @@ import middleware from "../../middleware/middleware";
 
 interface Request extends NextApiRequest {
   files?: {
-    image: { path: string; originalFileName: string; size: number }[];
+    image: { path: string; originalFilename: string; size: number }[];
   };
 }
 
@@ -40,10 +40,6 @@ const handler = nextConnect();
 handler.use(middleware);
 
 handler.post(async (req: Request, res: NextApiResponse) => {
-  if (req.method !== "POST") {
-    return res.status(501).end();
-  }
-
   const session = await getSession({ req });
 
   if (!session) {
@@ -56,33 +52,32 @@ handler.post(async (req: Request, res: NextApiResponse) => {
     return res.status(401).json({ message: "User not found" });
   }
 
-  if (req.method === "POST") {
-    const post = await prisma.post.create({
-      data: {
-        title: req.body.title[0],
-        content: req.body.content[0],
-        subreddit: { connect: { name: req.body.subreddit_name[0] } },
-        author: { connect: { id: user.id } },
-      },
+  const post = await prisma.post.create({
+    data: {
+      title: req.body.title[0],
+      content: req.body.content[0],
+      subreddit: { connect: { name: req.body.subreddit_name[0] } },
+      author: { connect: { id: user.id } },
+    },
+  });
+
+  console.log(req.files);
+  console.log(req.files.image[0]);
+
+  if (req.files && req.files.image[0] && req.files.image[0].size > 0) {
+    const location = await uploadFile(
+      req.files.image[0].path,
+      req.files.image[0].originalFilename,
+      post.id
+    );
+
+    await prisma.post.update({
+      where: { id: post.id },
+      data: { image: location },
     });
-
-    if (req.files && req.files.image[0] && req.files.image[0].size > 0) {
-      const location = await uploadFile(
-        req.files.image[0].path,
-        req.files.image[0].originalFileName,
-        post.id
-      );
-
-      await prisma.post.update({
-        where: { id: post.id },
-        data: { image: location },
-      });
-    }
-
-    return res.json(post);
   }
 
-  return res.end();
+  return res.json(post);
 });
 
 export const config = {

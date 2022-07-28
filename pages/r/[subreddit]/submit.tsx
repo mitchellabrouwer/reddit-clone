@@ -57,10 +57,10 @@ export default function NewPost({ subreddit }) {
               }
 
               const body = new FormData();
-              body.append("image", image);
               body.append("title", title);
               body.append("content", content);
               body.append("subreddit_name", subreddit.name);
+              body.append("image", image);
 
               const res = await fetch("/api/post", {
                 body,
@@ -85,6 +85,7 @@ export default function NewPost({ subreddit }) {
               onChange={(e) => setContent(e.target.value)}
             />
             <div className="text-sm text-gray-600">
+              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
               <label className="relative my-3 block cursor-pointer font-medium underline">
                 {!imageURL && <p>Upload an image</p>}
                 <img src={imageURL}></img>
@@ -102,6 +103,7 @@ export default function NewPost({ subreddit }) {
                       setImage(event.target.files[0]);
                       setImageURL(URL.createObjectURL(event.target.files[0]));
                     }
+                    return true;
                   }}
                 ></input>
               </label>

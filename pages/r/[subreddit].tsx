@@ -6,7 +6,6 @@ import { getPostsFromSubreddit, getSubreddit } from "../../lib/data";
 import prisma from "../../lib/prisma";
 
 export default function Subreddit({ subreddit, posts }) {
-  console.log(subreddit);
   const router = useRouter();
   const { data: session, status } = useSession();
   const loading = status === "loading";
