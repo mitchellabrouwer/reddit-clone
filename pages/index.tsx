@@ -37,6 +37,18 @@ export default function Home({ posts }) {
         </Link>
       </header>
 
+      {session && (
+        <div className="border-3 my-10 mx-20 border border-black p-10">
+          <input
+            placeholder="Create subreddit"
+            className="w-full border-2 border-gray-800 p-4"
+            onClick={() => {
+              router.push(`/r/submit`);
+            }}
+          ></input>
+        </div>
+      )}
+
       <Posts posts={posts} />
     </div>
   );
