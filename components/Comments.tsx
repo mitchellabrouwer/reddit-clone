@@ -1,5 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+import Link from "next/link";
 import { useState } from "react";
 import timeago from "../lib/timeago";
 import NewComment from "./NewComment";
@@ -10,7 +11,10 @@ function Comment({ comment, post }) {
   return (
     <div className="mt-6">
       <p>
-        {comment.author.name} {timeago.format(new Date(comment.createdAt))}
+        <Link href={`/u/${comment.author.name}`}>
+          <a className="underline">{comment.author.name}</a>
+        </Link>
+        {timeago.format(new Date(comment.createdAt))}
       </p>
       <p>{comment.content}</p>
 

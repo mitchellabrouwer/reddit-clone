@@ -10,7 +10,11 @@ function Post({ post }) {
             <Link href={`/r/${post.subredditName}`}>
               <a className="mr-2 underline">/r/{post.subredditName}</a>
             </Link>
-            /r/{post.subredditName} Posted by {post.author.name}
+            /r/{post.subredditName}
+            Posted by
+            <Link href={`/u/${post.author.name}`}>
+              <a className="ml-1 underline">{post.author.name}</a>
+            </Link>
             <Link href={`/r/${post.subredditName}/comments/${post.id}`}>
               <a className="mx-2 underline">
                 {timeago.format(new Date(post.createdAt))}
@@ -30,6 +34,7 @@ function Post({ post }) {
           <img
             className="color-primary width-auto mt-2 flex-shrink text-base font-normal"
             src={post.image}
+            alt="User"
           />
         )}
         <p className="color-primary width-auto flex-shrink text-2xl font-bold">

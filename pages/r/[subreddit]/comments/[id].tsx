@@ -5,7 +5,6 @@ import Comments from "../../../../components/Comments";
 import NewComment from "../../../../components/NewComment";
 import { getPost, getSubreddit, getVote, getVotes } from "../../../../lib/data";
 import prisma from "../../../../lib/prisma";
-import timeago from "../../../../lib/timeago";
 
 export default function Post({ subreddit, post, votes, vote }) {
   const { data: session, status } = useSession();
@@ -74,10 +73,10 @@ export default function Post({ subreddit, post, votes, vote }) {
           <div className="flex flex-shrink-0 pb-0 ">
             <div className="group block flex-shrink-0 ">
               <div className="flex items-center text-gray-800">
-                Posted by {post.author.name} **
-                <p className="mx-2 underline">
-                  {timeago.format(new Date(post.createdAt))}
-                </p>
+                Posted by
+                <Link href={`/u/${post.author.name}`}>
+                  <a className="ml-1 underline">{post.author.name}</a>
+                </Link>
               </div>
             </div>
           </div>
