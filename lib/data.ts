@@ -166,8 +166,34 @@ export const getPostsFromUser = async (user_name, prisma) => {
   const posts = await prisma.post.findMany({
     where: { author: { name: user_name } },
     orderBy: [{ id: "desc" }],
-    include: { author: true },
+    include: {
+      author: true,
+      comments: {
+        where: {
+          parentId: null,
+        },
+        orderBy: [
+          {
+            id: "desc",
+          },
+        ],
+        include: {
+          author: true,
+        },
+      },
+    },
   });
 
-  return posts;
+  const postsWithComments = Promise.all(
+    posts.map(async (post) => {
+      if (post.comments) {
+        post.comments = await fetchCommentsOfComments(post.comments, prisma);
+      }
+      return post;
+    })
+  );
+
+  console.log(postsWithComments);
+
+  return postsWithComments;
 };

@@ -130,8 +130,6 @@ export async function getServerSideProps(context) {
   );
   vote = JSON.parse(JSON.stringify(vote));
 
-  console.log(post.comments);
-
   return {
     props: {
       subreddit,
