@@ -116,6 +116,7 @@ export async function getServerSideProps(context) {
   const session = await getSession(context);
 
   const subreddit = await getSubreddit(context.params.subreddit, prisma);
+
   let post = await getPost(parseInt(context.params.id, 10), prisma);
   post = JSON.parse(JSON.stringify(post));
 
@@ -128,6 +129,8 @@ export async function getServerSideProps(context) {
     prisma
   );
   vote = JSON.parse(JSON.stringify(vote));
+
+  console.log(post.comments);
 
   return {
     props: {

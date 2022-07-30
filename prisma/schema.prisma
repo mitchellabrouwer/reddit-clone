@@ -95,15 +95,19 @@ model Comment {
   parentId  Int?
   parent    Comment?  @relation("ParentComment", fields: [parentId], references: [id])
   comments  Comment[] @relation("ParentComment")
+  vote      Vote[]
 }
 
 model Vote {
-  id       Int     @id @default(autoincrement())
-  up       Boolean
-  author   User    @relation(fields: [authorId], references: [id])
-  authorId String
-  post     Post?   @relation(fields: [postId], references: [id])
-  postId   Int?
+  id        Int      @id @default(autoincrement())
+  up        Boolean
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  post      Post?    @relation(fields: [postId], references: [id])
+  postId    Int?
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId Int?
 
   @@unique([authorId, postId])
+  @@unique([authorId, commentId])
 }

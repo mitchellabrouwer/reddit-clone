@@ -118,11 +118,33 @@ export const getVotes = async (post, prisma) => {
   return upvotes - downvotes;
 };
 
-// eslint-disable-next-line camelcase
-export const getVote = async (post_id, user_id, prisma) => {
+export const getVote = async (postId, userId, prisma) => {
   const vote = await prisma.vote.findMany({
-    // eslint-disable-next-line camelcase
-    where: { postId: post_id, authorId: user_id },
+    where: { postId, authorId: userId },
+  });
+
+  if (vote.length === 0) {
+    return null;
+  }
+
+  return vote[0];
+};
+
+export const getCommentVotes = async (commentId, prisma) => {
+  const upvotes = await prisma.vote.count({
+    where: { commentId, up: true },
+  });
+
+  const downvotes = await prisma.vote.count({
+    where: { commentId, up: false },
+  });
+
+  return upvotes - downvotes;
+};
+
+export const getCommentVote = async (commentId, userId, prisma) => {
+  const vote = await prisma.vote.findMany({
+    where: { commentId, authorId: userId },
   });
 
   if (vote.length === 0) {
