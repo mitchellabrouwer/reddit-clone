@@ -53,7 +53,7 @@ handler.post(async (req: Request, res: NextApiResponse) => {
   }
 
   if (path.extname(req.files.image[0].originalFilename)) {
-    return res.status(401).json({ message: "Not image" });
+    return res.status(415).json({ message: "Not image" });
   }
 
   if (req.files.image[0].size > 3072000) {
