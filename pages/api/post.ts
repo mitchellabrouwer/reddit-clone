@@ -52,6 +52,14 @@ handler.post(async (req: Request, res: NextApiResponse) => {
     return res.status(401).json({ message: "User not found" });
   }
 
+  if (path.extname(req.files.image[0].originalFilename)) {
+    return res.status(401).json({ message: "Not image" });
+  }
+
+  if (req.files.image[0].size > 3072000) {
+    return res.status(401).json({ message: "Image size too large" });
+  }
+
   const post = await prisma.post.create({
     data: {
       title: req.body.title[0],
