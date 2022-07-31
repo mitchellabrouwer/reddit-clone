@@ -8,6 +8,16 @@ export default async function handler(req, res) {
     return res.end();
   }
 
+  const exists = await prisma.user.findUnique({
+    where: { name: req.body.name },
+  });
+
+  console.log(exists);
+
+  if (exists) {
+    return res.status(422).json({ message: "Name already taken" });
+  }
+
   if (req.method === "POST") {
     await prisma.user.update({
       where: {

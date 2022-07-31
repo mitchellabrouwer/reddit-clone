@@ -6,7 +6,8 @@ export default function SetUp() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const loading = status === "loading";
-
+  const [isError, setIsError] = useState(null);
+  console.log(isError);
   const [name, setName] = useState("");
   if (loading) {
     return null;
@@ -26,15 +27,22 @@ export default function SetUp() {
       className="mt-10 ml-20"
       onSubmit={async (e) => {
         e.preventDefault();
-        await fetch("/api/setup", {
+
+        const response = await fetch("/api/setup", {
           body: JSON.stringify({
             name,
           }),
           headers: { "Content-Type": "application/json" },
           method: "POST",
         });
-        session.user.name = name;
-        router.push("/");
+        if (response.status === 200) {
+          // setIsError(null);
+          session.user.name = name;
+          router.push("/");
+        } else if (response.status === 422) {
+          const setup = await response.json();
+          setIsError(setup.message);
+        }
       }}
     >
       <div className="mb-5 flex-1">
@@ -52,6 +60,8 @@ export default function SetUp() {
           minLength={5}
         />
       </div>
+
+      {isError && <div className="italic text-red-800">{isError}</div>}
 
       <button
         type="submit"
