@@ -1,18 +1,29 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-use-before-define */
+
+import { PrismaClient } from "@prisma/client";
+
 /* eslint-disable camelcase */
-export const getPosts = async (prisma) => {
+export const getPosts = async (prisma: PrismaClient, take: number, cursor?) => {
   const posts = await prisma.post.findMany({
     where: {},
     orderBy: [{ id: "desc" }],
     include: { author: true },
+    take,
+    cursor,
+    skip: cursor ? 1 : 0,
   });
 
   return posts;
 };
 
-export const getJoinedPosts = async (following, prisma) => {
+export const getJoinedPosts = async (
+  following,
+  prisma: PrismaClient,
+  take: number,
+  cursor?
+) => {
   const joined = following.map((subreddit) => subreddit.subredditName);
   console.log(joined);
 
@@ -20,6 +31,9 @@ export const getJoinedPosts = async (following, prisma) => {
     where: { subredditName: { in: joined } },
     orderBy: [{ id: "desc" }],
     include: { author: true },
+    take,
+    cursor,
+    skip: cursor ? 1 : 0,
   });
 
   return posts;
@@ -35,7 +49,12 @@ export const getSubreddit = async (name, prisma) => {
   return post;
 };
 
-export const getPostsFromSubreddit = async (subreddit, prisma) => {
+export const getPostsFromSubreddit = async (
+  subreddit: string,
+  prisma: PrismaClient,
+  take: number,
+  cursor?
+) => {
   const posts = await prisma.post.findMany({
     where: {
       subreddit: {
@@ -50,6 +69,9 @@ export const getPostsFromSubreddit = async (subreddit, prisma) => {
     include: {
       author: true,
     },
+    take,
+    cursor,
+    skip: cursor ? 1 : 0,
   });
 
   return posts;
@@ -69,7 +91,7 @@ const fetchCommentsOfComments = async (comments, prisma) => {
   );
 };
 
-const getComments = async (parent_id, prisma) => {
+const getComments = async (parent_id, prisma: PrismaClient) => {
   let comments = await prisma.comment.findMany({
     where: {
       parentId: parent_id,
@@ -175,7 +197,12 @@ export const getUser = async (name, prisma) => {
   return user;
 };
 
-export const getPostsFromUser = async (user_name, prisma) => {
+export const getPostsFromUser = async (
+  user_name,
+  prisma: PrismaClient,
+  take: number,
+  cursor?
+) => {
   const posts = await prisma.post.findMany({
     where: { author: { name: user_name } },
     orderBy: [{ id: "desc" }],
@@ -195,6 +222,9 @@ export const getPostsFromUser = async (user_name, prisma) => {
         },
       },
     },
+    take,
+    cursor,
+    skip: cursor ? 1 : 0,
   });
 
   const postsWithComments = Promise.all(

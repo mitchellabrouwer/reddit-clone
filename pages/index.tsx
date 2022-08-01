@@ -2,12 +2,15 @@ import { getSession, useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import LoadMore from "../components/LoadMore";
 import Posts from "../components/Posts";
 import { getFollowing, getJoinedPosts, getPosts } from "../lib/data";
 import prisma from "../lib/prisma";
 
-export default function Home({ posts }) {
+export default function Home({ initialPosts }) {
   const { data: session, status } = useSession();
+  const [posts, setPosts] = useState(initialPosts);
   const router = useRouter();
   const loading = status === "loading";
 
@@ -50,6 +53,7 @@ export default function Home({ posts }) {
       )}
 
       <Posts posts={posts} />
+      <LoadMore posts={posts} setPosts={setPosts} />
     </div>
   );
 }
@@ -60,15 +64,15 @@ export async function getServerSideProps(context) {
   const following = await getFollowing(session?.user.id, prisma);
 
   let posts = [
-    ...(await getJoinedPosts(following, prisma)),
-    ...(await getPosts(prisma)),
+    ...(await getJoinedPosts(following, prisma, 10, undefined)),
+    ...(await getPosts(prisma, 10, undefined)),
   ];
 
   posts = JSON.parse(JSON.stringify(posts));
 
   return {
     props: {
-      posts,
+      initialPosts: posts,
     },
   };
 }
