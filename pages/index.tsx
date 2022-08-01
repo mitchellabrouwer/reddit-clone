@@ -1,9 +1,9 @@
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Posts from "../components/Posts";
-import { getPosts } from "../lib/data";
+import { getFollowing, getJoinedPosts, getPosts } from "../lib/data";
 import prisma from "../lib/prisma";
 
 export default function Home({ posts }) {
@@ -54,9 +54,18 @@ export default function Home({ posts }) {
   );
 }
 
-export async function getServerSideProps() {
-  let posts = await getPosts(prisma);
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  const following = await getFollowing(session?.user.id, prisma);
+
+  let posts = [
+    ...(await getJoinedPosts(following, prisma)),
+    ...(await getPosts(prisma)),
+  ];
+
   posts = JSON.parse(JSON.stringify(posts));
+
   return {
     props: {
       posts,

@@ -1,11 +1,15 @@
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Posts from "../../components/Posts";
-import { getPostsFromSubreddit, getSubreddit } from "../../lib/data";
+import {
+  getFollowing,
+  getPostsFromSubreddit,
+  getSubreddit,
+} from "../../lib/data";
 import prisma from "../../lib/prisma";
 
-export default function Subreddit({ subreddit, posts }) {
+export default function Subreddit({ subreddit, posts, following }) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const loading = status === "loading";
@@ -17,6 +21,20 @@ export default function Subreddit({ subreddit, posts }) {
   if (!subreddit) {
     return <p className="p-5 text-center">Subreddit does not exist</p>;
   }
+
+  const sendJoin = async () => {
+    await fetch("/api/following", {
+      body: JSON.stringify({
+        subreddit: subreddit.name,
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+
+    router.reload();
+  };
+
+  console.log(following.some((sub) => sub.subredditName === subreddit.name));
 
   return (
     <>
@@ -30,6 +48,18 @@ export default function Subreddit({ subreddit, posts }) {
         <p className="text-center">/r/{subreddit.name}</p>
         <p className="text-left-grow ml-4">{subreddit.description}</p>
       </header>
+
+      <div className="mt-4 w-full">
+        <button
+          type="button"
+          className="btn m-auto mb-1 block rounded-full border px-4 font-bold"
+          onClick={sendJoin}
+        >
+          {following.some((sub) => sub.subredditName === subreddit.name)
+            ? "Joined"
+            : "+ Join"}
+        </button>
+      </div>
 
       {session && (
         <div className="border-3 my-10 mx-20 border border-black p-10">
@@ -48,15 +78,20 @@ export default function Subreddit({ subreddit, posts }) {
   );
 }
 
-export async function getServerSideProps({ params }) {
-  const subreddit = await getSubreddit(params.subreddit, prisma);
-  let posts = await getPostsFromSubreddit(params.subreddit, prisma);
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  const subreddit = await getSubreddit(context.params.subreddit, prisma);
+  let posts = await getPostsFromSubreddit(context.params.subreddit, prisma);
   posts = JSON.parse(JSON.stringify(posts));
+
+  const following = await getFollowing(session?.user.id, prisma);
 
   return {
     props: {
       subreddit,
       posts,
+      following,
     },
   };
 }

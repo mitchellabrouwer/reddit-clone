@@ -12,6 +12,19 @@ export const getPosts = async (prisma) => {
   return posts;
 };
 
+export const getJoinedPosts = async (following, prisma) => {
+  const joined = following.map((subreddit) => subreddit.subredditName);
+  console.log(joined);
+
+  const posts = await prisma.post.findMany({
+    where: { subredditName: { in: joined } },
+    orderBy: [{ id: "desc" }],
+    include: { author: true },
+  });
+
+  return posts;
+};
+
 export const getSubreddit = async (name, prisma) => {
   const post = await prisma.subreddit.findUnique({
     where: {
@@ -193,7 +206,15 @@ export const getPostsFromUser = async (user_name, prisma) => {
     })
   );
 
-  console.log(postsWithComments);
-
   return postsWithComments;
+};
+
+export const getFollowing = async (userId, prisma) => {
+  const following = await prisma.following.findMany({
+    where: {
+      userId,
+    },
+  });
+
+  return following;
 };

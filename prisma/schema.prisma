@@ -22,9 +22,10 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  posts    Post[]
-  comments Comment[]
-  votes    Vote[]
+  posts     Post[]
+  comments  Comment[]
+  votes     Vote[]
+  following Following[]
 }
 
 model VerificationToken {
@@ -65,9 +66,10 @@ model Session {
 }
 
 model Subreddit {
-  name        String @id
+  name        String      @id
   description String
   posts       Post[]
+  following   Following[]
 }
 
 model Post {
@@ -110,4 +112,14 @@ model Vote {
 
   @@unique([authorId, postId])
   @@unique([authorId, commentId])
+}
+
+model Following {
+  id            Int        @id @default(autoincrement())
+  subreddit     Subreddit? @relation(fields: [subredditName], references: [name])
+  subredditName String?
+  user          User       @relation(fields: [userId], references: [id])
+  userId        String
+
+  @@unique([subredditName, userId])
 }
