@@ -1,28 +1,14 @@
 import { getSession, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import Comments from "../../../../components/Comments";
 import NewComment from "../../../../components/NewComment";
+import { Vote } from "../../../../components/Vote";
 import { getPost, getSubreddit, getVote, getVotes } from "../../../../lib/data";
 import prisma from "../../../../lib/prisma";
 
 export default function Post({ subreddit, post, votes, vote }) {
   const { data: session, status } = useSession();
   const loading = status === "loading";
-  const router = useRouter();
-
-  const sendVote = async (up) => {
-    await fetch("/api/vote", {
-      body: JSON.stringify({
-        post: post.id,
-        up,
-      }),
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-    });
-
-    router.reload();
-  };
 
   if (loading) {
     return null;
@@ -46,28 +32,7 @@ export default function Post({ subreddit, post, votes, vote }) {
       </header>
 
       <div className="mb-4 flex flex-row  justify-center px-10">
-        <div className="border-3 my-10 mb-4 flex flex-col border-t border-l border-b border-black bg-gray-200 p-10 text-center">
-          <div
-            className="cursor-pointer"
-            onClick={async (e) => {
-              e.preventDefault();
-              sendVote(true);
-            }}
-          >
-            {vote?.up ? "⬆" : "↑"}
-          </div>
-          <div>{votes}</div>
-          <div
-            className="cursor-pointer"
-            onClick={async (e) => {
-              e.preventDefault();
-              sendVote(false);
-            }}
-          >
-            {/* eslint-disable-next-line no-nested-ternary */}
-            {!vote ? "↓" : vote?.up ? "↓" : "⬇"}
-          </div>
-        </div>
+        <Vote post={post} votes={votes} vote={vote} />
 
         <div className="border-3 my-10 mb-4 flex flex-col border-t border-r border-b border-black bg-gray-200 p-10 pl-0">
           <div className="flex flex-shrink-0 pb-0 ">

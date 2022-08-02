@@ -82,7 +82,12 @@ export async function getServerSideProps(context) {
   const session = await getSession(context);
 
   const subreddit = await getSubreddit(context.params.subreddit, prisma);
-  let posts = await getPostsFromSubreddit(context.params.subreddit, prisma);
+  let posts = await getPostsFromSubreddit(
+    context.params.subreddit,
+    prisma,
+    5,
+    undefined
+  );
   posts = JSON.parse(JSON.stringify(posts));
 
   const following = await getFollowing(session?.user.id, prisma);
