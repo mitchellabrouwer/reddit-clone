@@ -13,10 +13,10 @@ export default function Comment({ comment, post }) {
 
   useEffect(() => {
     const fetchVotes = async () => {
-      const data = await fetch(`/api/vote?comment=${comment.id}`);
-      const json = await data.json();
-      setVote(json.vote);
-      setVotes(json.votes);
+      const json = await fetch(`/api/vote?comment=${comment.id}`);
+      const data = await json.json();
+      setVote(data.vote);
+      setVotes(data.votes);
     };
     // note: not optimised
     fetchVotes().catch((error) => console.log(error));
